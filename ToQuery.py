@@ -36,7 +36,7 @@ class ToQuery:
         
         parser.set_thesaurus(thesaurus)
 
-        # queries = parser.parse_sentence(input_sentence)
+        parser.parse_sentence(input_sentence)
 
 def help_message():
     print('Usage:')
