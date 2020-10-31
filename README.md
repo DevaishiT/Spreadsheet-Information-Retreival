@@ -8,7 +8,7 @@ Hence, instead of having to navigate menus, a user can simply describe his/her q
 You can directly use the python wrapper by the following way:
 ```
 Usage:
-	python ln2sql.py -d <path> -i <input-sentence> [-l <path>] 
+	python ToQuery.py -d <path> -i <input-sentence> [-l <path>] 
 	[-t <path>] [-j <path>]
 Parameters:
 	-h					    print this help message
@@ -20,7 +20,7 @@ Parameters:
 ```
 Example of usage:
 ```
-python ln2sql.py -d database/city.sql -l lang/english.csv -j 
+python ToQuery.py -d database/city.sql -l lang/english.csv -j 
 output.json -i "how many city there are in which the employee name
 is similar to aman ?"
 ```
