@@ -1,2 +1,31 @@
-1. out code works with python3 version 3.4+
-2. to run use command:
+Working queries:
+
+- employee name similar to Paul
+
+
+- salary of employee name similar to Paul
+
+- all employees
+
+- number of employees with salary > 3000 (count aggregate)
+
+- employee with salary not equal to 3000
+
+- employees where department is hr (JOIN example)
+
+- add salary of employees
+- max salary of employees 				//aggregate operation should come before table name  ie in select phrase
+
+- employees in ascending order of salary
+
+- pincode of city named Indore
+
+- cities with employess aged 22 (JOIN)
+
+---- To show synonym matching
+ - maximum wage of employees
+
+NOT WORKING:
+
+Max/Min
+OR/AND

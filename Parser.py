@@ -6,6 +6,10 @@ import functools
 from threading import Thread
 from ParsingException import ParsingException
 from Query import *
+import nltk
+from nltk.corpus import wordnet
+from nltk.tokenize import RegexpTokenizer
+
 
 importlib.reload(sys)
 
@@ -609,6 +613,24 @@ class Parser:
         nkfd_form = unicodedata.normalize('NFKD', str(string))
         return u"".join([c for c in nkfd_form if not unicodedata.combining(c)])
 
+
+    def uniq(self, seq):
+        seen = set()
+        seen_add = seen.add
+        return [ x for x in seq if x not in seen and not seen_add(x)]
+
+    def createWordSynonyms(self, word):
+        synsets = wordnet.synsets(word)
+        synonyms = [word]
+
+        for s in synsets:
+            for l in s.lemmas():
+                synonyms.append(l.name())
+
+        # if there are no synonyms, put the original word in
+        synonyms.append(word)
+        return self.uniq(synonyms)
+
     def parse_sentence(self, sentence):
         number_of_table = 0 
         number_of_select_column = 0
@@ -668,12 +690,13 @@ class Parser:
 
             #operators used for assignment
             assignment_list.append(':')
-            assignment_list.append('=')
+            assignment_list.append('>')
             
             assignment_list = _transformationSortAlgo(assignment_list) 
             # Algorithmic logic for best substitution for extraction of values with the help of assigners.
 
 
+            #print("assignment_list: ",assignment_list)
             #some markers to mark different kinds of assignment
             general_assigner = "*##gen@7>>"
             like_assigner = "*##like@7>>"
@@ -686,11 +709,15 @@ class Parser:
                     assigner = str(" " + assigner + " ")
                     interm_text = interm_text.replace(assigner, str(" " + general_assigner + " "))
 
+            #print("interm text after assigner: ", interm_text)
 
             for i in re.findall("(['\"].*?['\"])", interm_text):
                 interm_text = interm_text.replace(i, i.replace(' ', '<_>').replace("'", '').replace('"','')) 
 
             interm_text_list = interm_text.split()
+
+            #print("int text list after split: ", interm_text_list)
+
 
             for idx, x in enumerate(interm_text_list):
                 index = idx + 1
@@ -703,7 +730,18 @@ class Parser:
                     if index < len(interm_text_list) and interm_text_list[index] != like_assigner and interm_text_list[index] != general_assigner:
                         # replace back <_> to spaces from the values assigned
                         columns_of_values_of_where.append(str("'" + str(interm_text_list[index]).replace('<_>', ' ') + "'"))
-            print("columns_of_values_of_where : ",columns_of_values_of_where)
+            if(len(columns_of_values_of_where) == 0):
+                for i in range(len(interm_text_list)-1):
+                    word = interm_text_list[i]
+                    synonyms = self.createWordSynonyms(word)
+                    for w in synonyms:
+                        for table in self.database_dictionary:
+                            if w in self.database_dictionary[table]:
+                                columns_of_values_of_where.append(interm_text_list[i+1])
+
+            #if(len(columns_of_values_of_where) == 0):
+
+            print("values : ",columns_of_values_of_where)
 
             
         tables_of_from = []
@@ -711,30 +749,44 @@ class Parser:
         from_phrase = ''
         where_phrase = ''
 
-        words = re.findall(r"[\w]+", self.remove_accents(sentence.encode().decode('utf-8')))
+        words = re.findall(r"[\w><=!]+", self.remove_accents(sentence.encode().decode('utf-8')))
+
+        # print("Printing synonyms")
+        # for i in list(range(len(words))):
+        #     synonyms = self.createWordSynonyms(words[i])
+        #     print(synonyms)
 
         for i in list(range(len(words))):
-            if words[i] in self.database_dictionary:
-                if number_of_table == 0:
-                    select_phrase = words[:i]
-                tables_of_from.append(words[i])
-                number_of_table += 1
-                last_table_position = i
-            for table in self.database_dictionary:
-                if words[i] in self.database_dictionary[table]:
+            synonyms = self.createWordSynonyms(words[i])
+            for word in synonyms:
+                if word in self.database_dictionary:
                     if number_of_table == 0:
-                        columns_of_select.append(words[i])
-                        number_of_select_column += 1
-                    else:
-                        if number_of_where_column == 0:
-                            from_phrase = words[
-                                len(select_phrase):last_table_position + 1]
-                        columns_of_where.append(words[i])
-                        number_of_where_column += 1
+                        select_phrase = words[:i]
+                    tables_of_from.append(word)
+                    words[i] = word
+                    number_of_table += 1
+                    last_table_position = i
                     break
-                else:
-                    if (number_of_table != 0) and (number_of_where_column == 0) and (i == (len(words) - 1)):
-                        from_phrase = words[len(select_phrase):]
+            flag=False
+            for table in self.database_dictionary:
+                if flag: break
+                for word in synonyms:
+                    if word in self.database_dictionary[table]:
+                        flag = True
+                        words[i] = word
+                        if number_of_table == 0:
+                            columns_of_select.append(word)
+                            number_of_select_column += 1
+                        else:
+                            if number_of_where_column == 0:
+                                from_phrase = words[
+                                    len(select_phrase):last_table_position + 1]
+                            columns_of_where.append(word)
+                            number_of_where_column += 1
+                        break
+                    else:
+                        if (number_of_table != 0) and (number_of_where_column == 0) and (i == (len(words) - 1)):
+                            from_phrase = words[len(select_phrase):]
 
         where_phrase = words[len(select_phrase) + len(from_phrase):]
 
@@ -742,9 +794,9 @@ class Parser:
             raise ParsingException("No keyword found in sentence!")
 
 
-        # print("Select phrase = ", select_phrase)
-        # print("From phrase = ", from_phrase)
-        # print("Where phrase = ", where_phrase)
+        print("Select phrase = ", select_phrase)
+        print("From phrase = ", from_phrase)
+        print("Where phrase = ", where_phrase)
 
         #  print("database_dictionary :", self.database_dictionary)
         

@@ -1,17 +1,17 @@
-AVG: average, AVErage                            
-SUM: sum, total                                  
-MAX: maximum                                     
-MIN: minimum                                     
-COUNT: number, how many, COunt                   
-JUNCTION: and                                    
-DISJUNCTION: or                                  
-GREATER: greater, over, greater than, more than,f
-LESS: less , less than                           
-BETWEEN: between, per                            
-ORDER: order, ordered                            
-ASC: ascending, increasing                       
-DESC: descending, decreasing, inverse, reverse, o
-GROUP: group, grouped                            
-NEGATION: not, no                                
-EQUAL: is, equal, equals                         
-LIKE: like, likes, similar to                    
+AVG: average, avg                         
+SUM: sum, total, add                      
+MAX: maximum, max, highest, most          
+MIN: minimum, min, lowest, least          
+COUNT: number, how many, count            
+JUNCTION: and, &                          
+DISJUNCTION: or                           
+GREATER: greater than, above, greater, ove
+LESS: less , less than, <, below          
+BETWEEN: between, in between              
+ORDER: order, ordered                     
+ASC: ascending, increasing                
+DESC: descending, decreasing, inverse, rev
+GROUP: group, grouped                     
+NEGATION: not, no, non, !=, not equal to, 
+EQUAL: is, equal, equals, =               
+LIKE: like, likes, similar to, as         
