@@ -9,7 +9,8 @@ from Query import *
 import nltk
 from nltk.corpus import wordnet
 from nltk.tokenize import RegexpTokenizer
-
+from nltk.stem import WordNetLemmatizer 
+nltk.download('wordnet')
 
 importlib.reload(sys)
 
@@ -652,6 +653,22 @@ class Parser:
         # tokenization done
 
         #some temporary vars
+       
+        sentence = ""
+        lemmatizer = WordNetLemmatizer() 
+        for token in input_word_list:
+            token_lem = lemmatizer.lemmatize(token)
+            added = 0
+            for table in self.database_dictionary:
+                if token_lem == lemmatizer.lemmatize(table) or token == table:
+                    sentence+=table+" "
+                    added = 1
+                    break
+            if added == 0:
+                sentence+=token+" "
+        sentence.rstrip()
+        input_for_finding_value = sentence.rstrip(string.punctuation.replace('"','').replace("'",""))
+        input_word_list = input_for_finding_value.split()
         start_phase = ''
         mid_phase = ''
         end_phase = ''
