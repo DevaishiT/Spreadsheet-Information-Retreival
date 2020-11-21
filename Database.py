@@ -39,6 +39,22 @@ class Database:
                 data[table.get_name()].append(column.get_name())
         return data
 
+    def get_foreign_keys_by_table(self):
+        data = {}
+        for table in self.tables:
+            data[table.get_name()] = table.get_foreign_keys()
+        return data
+
+    def get_foreign_keys_of_table(self, table_name):
+        for table in self.tables:
+            if table.get_name() == table_name:
+                return table.get_foreign_keys()
+
+    def get_foreign_key_names_of_table(self, table_name):
+        for table in self.tables:
+            if table.get_name() == table_name:
+                return table.get_foreign_key_names()
+
     def load(self, path):
         with open(path) as f:
             content = f.read()
